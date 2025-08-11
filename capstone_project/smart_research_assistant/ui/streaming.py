@@ -1,6 +1,6 @@
 import streamlit as st
 from smart_research_assistant.models.constants.openai_models import OPENAI_MODELS
-from smart_research_assistant.models.openai.client import OpenAIClient
+from smart_research_assistant.models.openai.client import OpenAIClient, OpenAIClientConfig
 from smart_research_assistant.ui.metrics import display_metrics
 from streamlit.delta_generator import DeltaGenerator
 
@@ -15,7 +15,14 @@ async def stream_to_app(
         full_text = latest_full_text
         output_box.markdown(full_text)
 
-    client = OpenAIClient(model_name=str(OPENAI_MODELS[model_name]["label"]), system_prompt=system_prompt)
+    try:
+        client = OpenAIClient(
+            OpenAIClientConfig(model_name=str(OPENAI_MODELS[model_name]["label"]), system_prompt=system_prompt)
+        )
+    except ValueError as e:
+        st.error(f"Error initializing OpenAI client: {e}")
+        return
+
     result = await client.get_response(prompt=prompt, on_stream_update=on_stream_update)
 
     if not result.is_success():

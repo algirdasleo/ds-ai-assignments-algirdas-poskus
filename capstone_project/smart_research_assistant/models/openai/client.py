@@ -1,33 +1,34 @@
-import os
 import time
 from typing import Callable, List
 
-from dotenv import load_dotenv
 from openai import APIConnectionError, AsyncOpenAI, AsyncStream, AuthenticationError, BadRequestError, RateLimitError
 from openai.types.chat import ChatCompletionChunk, ChatCompletionMessageParam
+from pydantic import BaseModel
+from smart_research_assistant.configs.env.config import Settings
 from smart_research_assistant.models.helpers.message_helper import form_messages
 from smart_research_assistant.models.result.result import ErrorType, Result
 from smart_research_assistant.models.result.result_details import ResultDetails
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-load_dotenv()
+settings = Settings()
+
+
+class OpenAIClientConfig(BaseModel):
+    model_name: str
+    system_prompt: str | None = None
+    chat_history: List[ChatCompletionMessageParam] | None = None
+    api_key: str | None = None
 
 
 class OpenAIClient:
-    def __init__(
-        self,
-        model_name: str,
-        system_prompt: str | None = None,
-        chat_history: List[ChatCompletionMessageParam] | None = None,
-        api_key: str | None = None,
-    ) -> None:
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+    def __init__(self, config: OpenAIClientConfig) -> None:
+        self.api_key = config.api_key or settings.openai_api_key
         if not self.api_key:
             raise ValueError("API key is required. Please set it in the Settings tab or .env file.")
 
         self.client = AsyncOpenAI(api_key=self.api_key)
-        self.model_name = model_name
-        self.chat_history = form_messages(system_prompt=system_prompt, history=chat_history)
+        self.model_name = config.model_name
+        self.chat_history = form_messages(system_prompt=config.system_prompt, history=config.chat_history)
 
     async def get_response(
         self,

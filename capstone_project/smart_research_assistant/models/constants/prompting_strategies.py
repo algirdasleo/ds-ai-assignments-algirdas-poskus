@@ -26,8 +26,5 @@ PROMPT_STRATEGIES = {
         "Okay, now that we've done electricity...\n\n"
         "Can you explain gravity to me like I am a five year-old?\n"
     ),
-    "Role-based Prompt (System Prompt)": (
-        "You are a kind teacher who loves explaining science to small children using fun and simple words."
-        "Explain the concept of gravity to a five-year-old."
-    ),
+    "Role-based Prompt (System Prompt)": ("Explain the concept of gravity to a five-year-old."),
 }

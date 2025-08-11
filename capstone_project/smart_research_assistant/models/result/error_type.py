@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ErrorType(Enum):
-    NONE = "None"
-    INVALID_API_KEY = "Invalid API Key"
-    RATE_LIMIT_EXCEEDED = "Rate Limit Exceeded"
-    UNHANDLED_EXCEPTION = "Unhandled Exception"
-    AUTHENTICATION_ERROR = "Authentication Error"
-    CONNECTION_ERROR = "Connection Error"
-    BAD_REQUEST = "Bad Request"
+class ErrorType(StrEnum):
+    NONE = "none"
+    INVALID_API_KEY = "invalid_api_key"
+    RATE_LIMIT_EXCEEDED = "rate_limit_exceeded"
+    UNHANDLED_EXCEPTION = "unhandled_exception"
+    AUTHENTICATION_ERROR = "authentication_error"
+    CONNECTION_ERROR = "connection_error"
+    BAD_REQUEST = "bad_request"
