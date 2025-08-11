@@ -6,12 +6,20 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.12"
+streamlit = "^1.47.1"
+chromadb = "^1.0.15"
+langgraph = "^0.6.3"
+httpx = "^0.28.1"
+pydantic = "^2.11.7"
+python-dotenv = "^1.1.1"
+openai = "^1.99.1"
+nest-asyncio = "^1.6.0"
+tenacity = "^9.1.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
 isort = "^6.0.1"
 ruff = "^0.11.2"
-ipykernel = "^6.30.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

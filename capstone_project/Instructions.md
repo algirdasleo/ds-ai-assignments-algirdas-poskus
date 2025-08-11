@@ -38,5 +38,5 @@ Or you can enter the API key directly in the Streamlit app "Settings" tab.
 ### 3. Run the app
 
 ``` bash
-PYTHONPATH=. streamlit run smart_research_assistant/main.py
+poetry run python run.py
 ```

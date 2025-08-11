@@ -39,7 +39,7 @@ def launch_app() -> None:
             if prompt_strategy == "Role-based Prompt (System Prompt)":
                 system_prompt = st.text_area(
                     label="System Prompt",
-                    value="You are a professional French translator. Respond only with accurate and formal translations.",
+                    value="You are a kind teacher who loves explaining science to small children using fun and simple words.",
                     height=100,
                     key="system_prompt",
                 )
@@ -52,19 +52,19 @@ def launch_app() -> None:
 
                 with col1:
                     st.markdown(f"#### Response from {model_name_first}")
-                    with st.chat_message("ai"):
-                        output_box_1 = st.empty()
-
                     with st.container(height=120):
                         stat_box_1 = st.empty()
 
+                    with st.chat_message("ai"):
+                        output_box_1 = st.empty()
+
                 with col2:
                     st.markdown(f"#### Response from {model_name_second}")
-                    with st.chat_message("ai"):
-                        output_box_2 = st.empty()
-
                     with st.container(height=120):
                         stat_box_2 = st.empty()
+
+                    with st.chat_message("ai"):
+                        output_box_2 = st.empty()
 
                 async def run_both_models():
                     await asyncio.gather(
