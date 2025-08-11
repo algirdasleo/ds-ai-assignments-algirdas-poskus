@@ -5,11 +5,10 @@ from typing import Callable, List
 from dotenv import load_dotenv
 from openai import APIConnectionError, AsyncOpenAI, AsyncStream, AuthenticationError, BadRequestError, RateLimitError
 from openai.types.chat import ChatCompletionChunk, ChatCompletionMessageParam
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
-
 from smart_research_assistant.models.helpers.message_helper import form_messages
 from smart_research_assistant.models.result.result import ErrorType, Result
 from smart_research_assistant.models.result.result_details import ResultDetails
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 load_dotenv()
 

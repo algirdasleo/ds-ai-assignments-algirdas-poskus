@@ -4,7 +4,6 @@ import os
 import nest_asyncio
 import streamlit as st
 from dotenv import load_dotenv, set_key
-
 from smart_research_assistant.models.constants.openai_models import OPENAI_MODELS
 from smart_research_assistant.models.constants.prompting_strategies import PROMPT_STRATEGIES
 from smart_research_assistant.ui.streaming import stream_to_app

@@ -1,7 +1,6 @@
 from typing import Dict
 
 import streamlit as st
-
 from smart_research_assistant.models.result.result_details import ResultDetails
 
 
