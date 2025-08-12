@@ -1,5 +1,5 @@
 import streamlit as st
-from smart_research_assistant.models.constants.openai_models import OPENAI_MODELS
+from smart_research_assistant.constants.openai_models import OPENAI_MODELS
 from smart_research_assistant.models.openai.client import OpenAIClient, OpenAIClientConfig
 from smart_research_assistant.ui.metrics import display_metrics
 from streamlit.delta_generator import DeltaGenerator

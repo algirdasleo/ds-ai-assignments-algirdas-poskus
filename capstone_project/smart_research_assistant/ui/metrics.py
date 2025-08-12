@@ -1,7 +1,7 @@
 from typing import Dict
 
 import streamlit as st
-from smart_research_assistant.models.result.result_details import ResultDetails
+from smart_research_assistant.result.result_details import ResultDetails
 
 
 def display_metrics(result_data: ResultDetails, model_name: str, model_info: Dict[str, Dict[str, float | str]]) -> None:

@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
-from smart_research_assistant.models.result.error_type import ErrorType
-from smart_research_assistant.models.result.result_status import ResultStatus
+from smart_research_assistant.result.error_type import ErrorType
+from smart_research_assistant.result.result_status import ResultStatus
 
 T = TypeVar("T")
 

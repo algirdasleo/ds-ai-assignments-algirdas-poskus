@@ -5,9 +5,10 @@ from openai import APIConnectionError, AsyncOpenAI, AsyncStream, AuthenticationE
 from openai.types.chat import ChatCompletionChunk, ChatCompletionMessageParam
 from pydantic import BaseModel
 from smart_research_assistant.configs.env.config import Settings
-from smart_research_assistant.models.helpers.message_helper import form_messages
-from smart_research_assistant.models.result.result import ErrorType, Result
-from smart_research_assistant.models.result.result_details import ResultDetails
+from smart_research_assistant.helpers.message_helper import form_messages
+from smart_research_assistant.result.error_type import ErrorType
+from smart_research_assistant.result.result import Result
+from smart_research_assistant.result.result_details import ResultDetails
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 settings = Settings()
