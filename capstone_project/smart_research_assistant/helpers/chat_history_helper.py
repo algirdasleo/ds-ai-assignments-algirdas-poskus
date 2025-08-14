@@ -1,15 +1,13 @@
-from typing import List
-
-from openai.types.chat import ChatCompletionMessageParam
+from typing import Dict, List
 
 
-def form_messages(
+def format_messages(
     user_prompt: str | None = None,
     system_prompt: str | None = None,
-    history: List[ChatCompletionMessageParam] | None = None,
-) -> List[ChatCompletionMessageParam]:
+    history: List[Dict[str, str]] | None = None,
+) -> List:
 
-    messages: List[ChatCompletionMessageParam] = []
+    messages = []
 
     if history:
         if history[0]["role"] != "system":

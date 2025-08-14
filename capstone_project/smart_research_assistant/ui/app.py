@@ -7,15 +7,15 @@ def launch_app() -> None:
     st.set_page_config(layout="wide")
 
     pages = {
-        "Models": [
-            st.Page("ui/pages/model_comparison.py", title="Cloud Models Comparison"),
-            st.Page("ui/pages/local_models.py", title="Local Model Execution"),
+        "MODELS": [
+            st.Page("ui/pages/model_comparison.py", title="Comparison"),
+            st.Page("ui/pages/model_selection.py", title="Auto/Manual Selection"),
         ],
-        "Other": [
+        "OTHER": [
             st.Page("ui/pages/settings.py", title="Settings"),
         ],
     }
 
-    pg = st.navigation(pages)
+    pg = st.navigation(pages, position="top")
 
     pg.run()

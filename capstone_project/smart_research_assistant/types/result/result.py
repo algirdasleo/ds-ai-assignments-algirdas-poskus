@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
-from smart_research_assistant.result.error_type import ErrorType
-from smart_research_assistant.result.result_status import ResultStatus
+from smart_research_assistant.types.result.error_type import ErrorType
+from smart_research_assistant.types.result.result_status import ResultStatus
 
 T = TypeVar("T")
 
@@ -24,5 +24,5 @@ class Result(Generic[T]):
         return cls(data=data, error=ErrorType.NONE, status=ResultStatus.SUCCESS)
 
     @classmethod
-    def fail(cls, error: ErrorType, error_message: str | None) -> Result[Any]:
+    def fail(cls, error: ErrorType, error_message: str | None = None) -> Result[Any]:
         return cls(data=None, error=error, status=ResultStatus.FAILURE, error_message=error_message)
