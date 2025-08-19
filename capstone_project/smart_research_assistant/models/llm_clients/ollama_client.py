@@ -1,12 +1,13 @@
 import time
 
-from ollama import AsyncClient
 from smart_research_assistant.helpers.chat_history_helper import format_messages
 from smart_research_assistant.helpers.response_helper import count_tokens
-from capstone_project.smart_research_assistant.models.llm_clients.base import ChatModel, ChatStreamParams
+from smart_research_assistant.models.llm_clients.base import ChatModel, ChatStreamParams
 from smart_research_assistant.types.result.error_type import ErrorType
 from smart_research_assistant.types.result.response_details import ResponseDetails
 from smart_research_assistant.types.result.result import Result
+
+from ollama import AsyncClient
 
 
 class OllamaChatClient(ChatModel):
