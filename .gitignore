@@ -173,5 +173,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-*/.venv/
+# Others
+**/.venv/
 **/.idea/
+**/ollama/ollama
