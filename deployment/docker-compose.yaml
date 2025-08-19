@@ -1,0 +1,31 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    network_mode: "host"
+  
+  research-assistant:
+    image: research-assistant
+    restart: always
+    ports:
+      - 8080:8080
+    network_mode: "host"
+ 
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    ports:
+      - 11434:11434
+    volumes:
+      - .:/code
+      - ./ollama/ollama:/root/.ollama
+    container_name: ollama
+    tty: true
+    restart: always
+    network_mode: "host"
+ 

@@ -2,7 +2,7 @@ import asyncio
 
 import streamlit as st
 from smart_research_assistant.helpers.model_selection_helper import get_ollama_models_details, select_model, sort_models
-from smart_research_assistant.models.ollama.client import OllamaChatClient
+from smart_research_assistant.models.llm_clients.ollama_client import OllamaChatClient
 from smart_research_assistant.ui.chat_box import render_chatbox
 
 models = get_ollama_models_details()

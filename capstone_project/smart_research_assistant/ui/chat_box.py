@@ -1,7 +1,7 @@
 from typing import Dict
 
 import streamlit as st
-from smart_research_assistant.models.chat_model import ChatModel, ChatStreamParams
+from smart_research_assistant.models.llm_clients.base import ChatModel, ChatStreamParams
 from smart_research_assistant.ui.metrics import display_metrics
 from streamlit.delta_generator import DeltaGenerator
 
