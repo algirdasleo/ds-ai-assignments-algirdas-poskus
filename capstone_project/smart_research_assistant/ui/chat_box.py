@@ -35,7 +35,6 @@ async def render_chatbox(
             prompt=prompt,
             stream_box=stream_box,
             messages=st.session_state[chatbot_id]["local_messages"],
-            api_key=api_key,
             display_model_name=display_model_name,
         )
 

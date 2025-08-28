@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict
 
 OPENAI_MODELS: Dict[str, Dict[str, float]] = {
@@ -14,3 +15,8 @@ OPENAI_MODELS: Dict[str, Dict[str, float]] = {
         "price_per_1m_output_tokens": 1.50,
     },
 }
+
+
+class OPENAI_EMBEDDING_MODELS(Enum):
+    TEXT_EMBEDDING_3_SMALL = 1536
+    TEXT_EMBEDDING_3_LARGE = 3072
