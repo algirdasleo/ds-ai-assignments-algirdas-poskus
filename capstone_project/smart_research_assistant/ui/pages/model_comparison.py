@@ -4,8 +4,8 @@ import streamlit as st
 from smart_research_assistant.constants.openai_models import OPENAI_MODELS
 from smart_research_assistant.constants.prompting_strategies import PROMPT_STRATEGIES
 from smart_research_assistant.helpers.model_selection_helper import get_ollama_models_details
-from smart_research_assistant.models.ollama.ollama_client import OllamaChatClient
-from smart_research_assistant.models.openai.openai_client import OpenAIChatClient
+from smart_research_assistant.models.llm_clients.ollama_client import OllamaChatClient
+from smart_research_assistant.models.llm_clients.openai_client import OpenAIChatClient
 from smart_research_assistant.ui.chat_box import render_chatbox
 from streamlit.delta_generator import DeltaGenerator
 

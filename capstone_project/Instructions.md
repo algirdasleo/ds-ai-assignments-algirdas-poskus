@@ -25,17 +25,17 @@ If you don't have Poetry installed, you can install it using:
 pip install poetry
 ```
 
-### 2. Configure the OpenAI API key
+### 2. Add the required environment variables
 
-Create a `.env` file in the root directory of the project and add your OpenAI API key:
+Create a `.env` file in the root directory of the project and environment variables specified in the .env.example file.
+
+### 3. Create the database tables used for metadata storing
 
 ``` bash
-OPENAI_API_KEY=api_key_here
+poetry run python init_db.py
 ```
 
-Or you can enter the API key directly in the Streamlit app "Settings" tab.
-
-### 3. Run the app
+### 4. Run the app
 
 ``` bash
 poetry run python run.py

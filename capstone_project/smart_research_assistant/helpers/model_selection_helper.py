@@ -17,7 +17,7 @@ def get_ollama_models_details() -> Dict[str, Dict[str, str]]:
 
 
 def select_model(sorted_models: Dict[str, List[str]], prompt: str) -> str | None:
-    if len(sorted_models) == 1:
+    if not sorted_models:
         return list(sorted_models.keys())[0]
 
     if not all(k in sorted_models for k in ["simple", "powerful"]):

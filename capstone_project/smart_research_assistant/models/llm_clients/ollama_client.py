@@ -1,7 +1,6 @@
 import time
 
-from smart_research_assistant.helpers.chat_history_helper import format_messages
-from smart_research_assistant.helpers.response_helper import count_tokens
+from smart_research_assistant.helpers.text_processing_helper import count_tokens, format_messages
 from smart_research_assistant.models.llm_clients.base import ChatModel, ChatStreamParams
 from smart_research_assistant.types.result.error_type import ErrorType
 from smart_research_assistant.types.result.response_details import ResponseDetails
@@ -24,7 +23,7 @@ class OllamaChatClient(ChatModel):
         time_start = time.time()
 
         try:
-            client = AsyncClient(host="http://ollama:11434")
+            client = AsyncClient(host="http://localhost:11434")
 
             async for chunk in await client.chat(
                 model=params.model_name,

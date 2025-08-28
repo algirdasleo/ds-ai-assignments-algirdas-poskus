@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class ResponseDetails(BaseModel):
     response: str
+    parsed_response: BaseModel | None = None
     tokens_used: int
     time_to_first_token: float
     total_time: float
