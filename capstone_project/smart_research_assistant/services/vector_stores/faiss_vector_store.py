@@ -55,11 +55,16 @@ class FaissVectorStore(VectorStore):
             vector = normalize(vector, norm="l2", axis=1)
             distances, ids = self.index.search(vector, top_k)  # type: ignore
 
-            results: List[RelevantDocument] = []
+            unique_ids = set()
+            filtered_results = []
             for idx, dist in zip(ids[0], distances[0]):
-                if idx == -1 or idx not in self.id_to_doc:
+                if idx == -1 or idx not in self.id_to_doc or idx in unique_ids:
                     continue
+                unique_ids.add(idx)
+                filtered_results.append((idx, dist))
 
+            results: List[RelevantDocument] = []
+            for idx, dist in filtered_results:
                 doc_id, chunk_idx = self.id_to_doc[idx]
                 results.append(
                     RelevantDocument(

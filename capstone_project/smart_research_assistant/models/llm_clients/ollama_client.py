@@ -11,6 +11,9 @@ from ollama import AsyncClient
 
 class OllamaChatClient(ChatModel):
     async def chat_stream(self, params: ChatStreamParams, **kwargs) -> Result[ResponseDetails]:
+        if params.stream_box is None:
+            return Result.fail(ErrorType.INVALID_PARAMETERS, "Stream box is required")
+
         if params.display_model_name:
             full_response = f"Selected model: :green-badge[{params.model_name}]. \n\n"
             params.stream_box.write(full_response)
@@ -50,7 +53,7 @@ class OllamaChatClient(ChatModel):
                 response=full_response,
                 time_to_first_token=time_to_first_token or -1,
                 total_time=time_taken,
-                tokens_used=count_tokens(full_response + params.prompt),
+                tokens_used=count_tokens(full_response + params.prompt, params.model_name),
                 updated_messages=params.messages,
             )
         )

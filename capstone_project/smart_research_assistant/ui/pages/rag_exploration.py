@@ -1,6 +1,7 @@
 import asyncio
 
 import streamlit as st
+from smart_research_assistant.agents.rag_agent_workflow import RAGAgentWorkflow
 from smart_research_assistant.constants.openai_models import OPENAI_EMBEDDING_MODELS, OPENAI_MODELS
 from smart_research_assistant.models.embeddings.openai_embedding import OpenAIEmbedding
 from smart_research_assistant.services.chunking.semantic_chunking_strategy import SemanticChunking
@@ -91,8 +92,8 @@ with st.container(border=True):
             st.success("Vector and metadata stores have been reset.")
 
     with st.container(border=True):
-        st.markdown("### 3. Execute RAG Pipeline")
-        st.markdown("**This section allows you to execute the RAG pipeline.**")
+        st.markdown("### 3. Execute RAG Pipeline OR Agent Workflow")
+        st.markdown("**This section allows you to execute the RAG pipeline or the RAG Agent Workflow.**")
 
         col1, col2 = st.columns(2)
 
@@ -102,19 +103,19 @@ with st.container(border=True):
         with col2:
             top_k = st.number_input("Number of chunks to retrieve", min_value=1, max_value=20, value=3)
 
+        with st.expander("Context"):
+            context_box = st.empty()
+
+        with st.container(border=True):
+            result_box = st.caption("Results...")
+
+        with st.expander("Used References"):
+            references_box = st.empty()
+
         if st.button("Run RAG Pipeline"):
             if not prompt:
                 st.warning("Please enter a prompt to run the RAG pipeline.")
                 st.stop()
-
-            with st.expander("Retrieved most relevant chunks"):
-                context_box = st.empty()
-
-            with st.container(border=True):
-                result_box = st.empty()
-
-            with st.expander("References"):
-                references_box = st.empty()
 
             with st.status("Running RAG pipeline...", expanded=True) as status:
 
@@ -136,11 +137,11 @@ with st.container(border=True):
 
                 rag_result = asyncio.run(
                     pipeline.generate(
-                        prompt,
-                        retrieval_result.data,
-                        context_box,
-                        result_box,
-                        references_box,
+                        query=prompt,
+                        metadata=retrieval_result.data,
+                        context_box=context_box,
+                        result_box=result_box,
+                        references_box=references_box,
                         update_status=write_update,
                     )
                 )
@@ -151,3 +152,22 @@ with st.container(border=True):
                     st.stop()
                 else:
                     status.update(label="RAG pipeline completed successfully.", state="complete", expanded=False)
+
+        if st.button("Run RAG Agent Workflow"):
+            with st.expander("Workflow Logs", expanded=True):
+                log_box = st.empty()
+
+            rag_agent_workflow = RAGAgentWorkflow(
+                rag_pipeline=pipeline,
+                log_box=log_box,
+                result_box=result_box,
+                references_box=references_box,
+                context_box=context_box,
+            )
+
+            graph_state = asyncio.run(rag_agent_workflow.run(prompt, top_k))
+            if not graph_state:
+                st.error("RAG Agent Workflow failed.")
+
+            with st.expander("Graph Visualisation"):
+                st.image(rag_agent_workflow.graph.get_graph().draw_mermaid_png())
