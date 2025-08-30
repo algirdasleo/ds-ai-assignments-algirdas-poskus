@@ -1,6 +1,7 @@
-from typing import Callable, List
+from typing import Callable, Dict, List
 
 from pydantic import BaseModel
+from smart_research_assistant.constants.prompt_templates import generate_answer_prompt
 from smart_research_assistant.helpers.research_paper_helper import gather_documents
 from smart_research_assistant.helpers.text_processing_helper import (
     extract_text_from_pdf,
@@ -13,7 +14,7 @@ from smart_research_assistant.services.chunking.base import ChunkingStrategy
 from smart_research_assistant.services.metadata_stores.base import MetadataStore
 from smart_research_assistant.services.vector_stores.base import VectorStore
 from smart_research_assistant.types.metadata import ChunkMetadata, Metadata
-from smart_research_assistant.types.rag_answer_model import AnswerModel
+from smart_research_assistant.types.rag_answer import AnswerModel
 from smart_research_assistant.types.result.result import ErrorType, Result
 from smart_research_assistant.ui.chat_box import ChatStreamParams
 from streamlit.delta_generator import DeltaGenerator
@@ -67,9 +68,8 @@ class RagPipeline:
                     chunks_result = self.chunking_strategy.chunk(extracted_text)
                     if not chunks_result.is_success():
                         raise ValueError(f"Failed to chunk text: {chunks_result.error_message}")
-                except Exception as e:
+                except Exception as _:
                     send_status_update(f"Failed to process document: {doc_metadata.title}", update_status)
-                    print(e)
                     continue
 
                 chunks = chunks_result.data or []
@@ -125,11 +125,12 @@ class RagPipeline:
         send_status_update("Performing similarity search...", update_status)
         # 2. Perform similarity search in vector store to find K top embeddings
         vector_result = self.vector_store.search(query_embedding, top_k=k_embeddings)
+
         if not vector_result.is_success() or not vector_result.data:
             return Result.fail(ErrorType.RAG_PIPELINE_ERROR, vector_result.error_message or "No similar vectors found.")
 
         send_status_update("Filtering relevant documents...", update_status)
-        # 3. Filter most relevant documents'
+        # 3. Filter most relevant documents
         relevant_docs = [doc for doc in vector_result.data if doc.similarity_score > 0.5]
         if not relevant_docs:
             await self.inform_user_of_no_results(stream_box)
@@ -150,7 +151,8 @@ class RagPipeline:
                     f"chunk_id {doc.chunk_id} out of range (total chunks: {len(chunks)}) for doc_id {doc.doc_id}",
                 )
 
-            metadata.append(Metadata(document=metadata_result.data.document, chunks=chunks))
+            relevant_chunk = chunks[doc.chunk_id]
+            metadata.append(Metadata(document=metadata_result.data.document, chunks=[relevant_chunk]))
 
         if not metadata:
             await self.inform_user_of_no_results(stream_box)
@@ -162,15 +164,16 @@ class RagPipeline:
         self,
         query: str,
         metadata: List[Metadata],
-        context_box: DeltaGenerator | None,
-        result_box: DeltaGenerator | None,
-        references_box: DeltaGenerator | None,
+        web_search_data: List[Dict[str, str]] = [],
+        context_box: DeltaGenerator | None = None,
+        result_box: DeltaGenerator | None = None,
+        references_box: DeltaGenerator | None = None,
         update_status: Callable[[str], None] | None = None,
     ) -> Result[str]:
         try:
             send_status_update("Creating LLM prompt with context...", update_status)
             # 1. Create context
-            context = form_context(metadata)
+            context = form_context(metadata, web_search_data)
             if context_box:
                 context_box.write(context)
 
@@ -179,21 +182,12 @@ class RagPipeline:
             answer = await OpenAIChatClient().chat_stream(
                 ChatStreamParams(
                     model_name=self.openai_chat_model,
-                    prompt=f"""Context:
-                            {context}
-
-                            Question: "{query}"
-                            
-                            If unable to answer with context, answer with: 'Not enough information available to answer your question.'
-                            
-                            Otherwise, answer by citing from the context. Mention the papers names and the publish date.
-                            
-                            Answer: """,
+                    prompt=generate_answer_prompt(context, query),
                     stream_box=result_box,
                     messages=[
                         {
                             "role": "system",
-                            "content": "You are a research assistant helping summarize and answer questions using retrieved papers.",
+                            "content": "You are a research assistant helping answer questions using referencing retrieved papers and web search content.",
                         }
                     ],
                     answer_schema=AnswerModel,

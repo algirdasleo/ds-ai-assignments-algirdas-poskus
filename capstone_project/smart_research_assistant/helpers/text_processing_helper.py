@@ -3,12 +3,11 @@ from typing import Dict, List
 
 import pdfplumber
 import requests
+import tiktoken
 from smart_research_assistant.types.metadata import DocumentMetadata, Metadata
-from smart_research_assistant.types.rag_answer_model import AnswerModel
+from smart_research_assistant.types.rag_answer import AnswerModel
 from streamlit.delta_generator import DeltaGenerator
 from transformers import GPT2Tokenizer
-
-_tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 
 
 def remove_text_references(pages: List[str]) -> str:
@@ -65,12 +64,7 @@ def format_messages(
     return messages
 
 
-def count_tokens(text: str) -> int:
-    tokens = _tokenizer.encode(text)
-    return len(tokens)
-
-
-def form_context(metadata: List[Metadata]) -> str:
+def form_context(metadata: List[Metadata], web_search_data: List[Dict[str, str]]) -> str:
     context = ""
     for item in metadata:
         context += (
@@ -79,6 +73,12 @@ def form_context(metadata: List[Metadata]) -> str:
             f"CHUNK NO. {item.chunks[0].chunk_index}]\n\n"
             f'CONTENT: "{item.chunks[0].content}"\n\n\n'
         )
+
+    context += "[WEB SEARCH RESULTS]:\n\n"
+    for item in web_search_data:
+        for key, value in item.items():
+            context += f"{key}: {value}\n\n"
+
     return context
 
 
@@ -89,7 +89,50 @@ def write_references(answer_model: AnswerModel, stream_box: DeltaGenerator | Non
     references = ""
     for i, reference in enumerate(answer_model.references):
         references += (
-            f'{i + 1}. Citation: "{reference.quote}".\n'
-            f'   :green-badge[ Document Title: "{reference.title}" ] :green-badge[ Chunk Index: {reference.chunk_idx} ] :green-badge[ PDF URL: {reference.pdf_url} ]\n\n'
+            f'{i + 1}. Citation: "{reference.quote}".\n\n'
+            f':green-badge[ Document Title: "{reference.title}" ]'
+            f":green-badge[ PDF URL: {reference.pdf_url} ]\n\n"
         )
+        if reference.chunk_idx:
+            references += f":green-badge[ Chunk Index: {reference.chunk_idx} ]\n\n"
     stream_box.write(references)
+
+
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+
+
+def count_tokens(text: str, model_name: str) -> int:
+    if not text:
+        return 0
+
+    try:
+        try:
+            encoding = tiktoken.encoding_for_model(model_name)
+        except KeyError:
+            encoding = tiktoken.get_encoding("cl100k_base")
+
+        return len(encoding.encode(text))
+
+    except Exception as _:
+        pass  # Fallback to GPT-2 tokenizer
+
+    try:
+        max_chunk_length = 1024  # Max size for GPT-2
+
+        split_text = text.split()
+        if len(split_text) > max_chunk_length:
+            total_tokens = 0
+
+            for i in range(0, len(split_text), max_chunk_length):
+                chunk_words = split_text[i : i + max_chunk_length]
+                chunk_text = " ".join(chunk_words)
+                chunk_tokens = tokenizer.encode(chunk_text)
+                total_tokens += len(chunk_tokens)
+
+            return total_tokens
+        else:
+            return len(tokenizer.encode(text))
+
+    except Exception as _:
+        # If even GPT-2 tokenizer fails, then fallback to word count
+        return len(text.split()) * 2
