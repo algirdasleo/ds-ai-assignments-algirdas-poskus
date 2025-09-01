@@ -90,11 +90,13 @@ def write_references(answer_model: AnswerModel, stream_box: DeltaGenerator | Non
     for i, reference in enumerate(answer_model.references):
         references += (
             f'{i + 1}. Citation: "{reference.quote}".\n\n'
-            f':green-badge[ Document Title: "{reference.title}" ]'
-            f":green-badge[ PDF URL: {reference.pdf_url} ]\n\n"
+            f':green-badge[ Document Title: "{reference.title or 'N/A'}" ]'
+            f":green-badge[ URL: {reference.url or 'N/A'} ]"
         )
         if reference.chunk_idx:
-            references += f":green-badge[ Chunk Index: {reference.chunk_idx} ]\n\n"
+            references += f":green-badge[ Chunk Index: {reference.chunk_idx} ]"
+        references += "\n\n"
+
     stream_box.write(references)
 
 

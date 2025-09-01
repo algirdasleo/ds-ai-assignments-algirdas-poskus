@@ -7,6 +7,10 @@ from smart_research_assistant.ui.chat_box import render_chatbox
 
 models = get_ollama_models_details()
 
+if not models:
+    st.markdown("No local models found. Please install a model using `ollama pull <model_name>`.")
+    st.stop()
+
 sorted_models = sort_models(models)
 
 if "local_messages" not in st.session_state:

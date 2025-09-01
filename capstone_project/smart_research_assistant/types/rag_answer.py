@@ -4,10 +4,10 @@ from pydantic import BaseModel
 
 
 class Reference(BaseModel):
-    title: str
-    pdf_url: str
-    chunk_idx: int | None
+    title: str | None
     quote: str
+    url: str
+    chunk_idx: int | None
 
 
 class AnswerModel(BaseModel):

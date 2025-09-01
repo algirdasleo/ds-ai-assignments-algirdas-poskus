@@ -96,7 +96,7 @@ class OpenAIChatClient(ChatModel):
                 parsed_response=parsed_response or None,
                 time_to_first_token=time_to_first_token or -1,
                 total_time=time_taken,
-                tokens_used=count_tokens(full_response + params.prompt),
+                tokens_used=count_tokens(full_response + params.prompt, params.model_name),
                 updated_messages=params.messages,
             )
         )

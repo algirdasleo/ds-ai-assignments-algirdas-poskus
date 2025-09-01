@@ -187,7 +187,7 @@ class RagPipeline:
                     messages=[
                         {
                             "role": "system",
-                            "content": "You are a research assistant helping answer questions using referencing retrieved papers and web search content.",
+                            "content": "You are a research assistant that answers questions using provided research papers and web search content.",
                         }
                     ],
                     answer_schema=AnswerModel,

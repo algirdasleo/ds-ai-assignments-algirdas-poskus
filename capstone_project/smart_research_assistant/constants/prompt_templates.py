@@ -36,15 +36,20 @@ def ai_ml_topic_check_prompt(query: str):
 
 
 def generate_answer_prompt(context: str, query: str) -> str:
-    return f"""Context:
-        {context}
-
+    return f"""
+        Context: "{context}"
         Question: "{query}"
         
-        Only use the information provided in the context and references. Do not use prior knowledge. 
-        If the answer is not found in the context, say: "Not enough information available to answer your question."
-
-        Use **Markdown** formatting.
-        Structure the answer with clear sections and bullet points.
-
-        Answer: """
+        
+        Rules:
+        1. Do not use **any** prior knowledge. 
+        2. You **must** include a reference for every fact or idea derived from the context or web search results, even if paraphrased.
+        3. Use Markdown formatting. Structure the answer with clear sections and bullet points.
+        4. If unable to answer, say: "Not enough information available to answer your question."
+        
+        Each reference object must have the following fields:
+        - "title": string or null
+        - "quote": string (required)
+        - "url": string (required)
+        - "chunk_idx": integer or null
+        """
