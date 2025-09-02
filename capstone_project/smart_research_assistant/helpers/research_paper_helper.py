@@ -1,4 +1,4 @@
-from typing import List
+from typing import Callable, List
 
 import arxiv
 from smart_research_assistant.services.metadata_stores.base import MetadataStore
@@ -35,7 +35,7 @@ def search_arxiv(query: str, n_results: int, excluded_ids: List[str]) -> Result[
         return Result.fail(ErrorType.ARXIV_ERROR, str(e))
 
 
-def gather_documents(
+def gather_documents_by_query(
     metadata_store: MetadataStore, search_query: str, n_documents: int
 ) -> Result[List[DocumentMetadata]]:
     try:
@@ -52,3 +52,50 @@ def gather_documents(
         return Result.ok(search_result.data)
     except Exception as e:
         return Result.fail(ErrorType.RAG_PIPELINE_ERROR, str(e))
+
+
+def gather_documents_by_arxiv_ids(
+    metadata_store: MetadataStore, ids: List[str], update_status: Callable[[str], None] | None
+) -> Result[List[DocumentMetadata]]:
+    try:
+        if not ids:
+            return Result.ok([])
+
+        existing_ids_result = metadata_store.get_document_ids()
+        existing_ids = existing_ids_result.data if existing_ids_result.is_success() and existing_ids_result.data else []
+
+        # Skip duplicates
+        remaining_ids = []
+        for id in ids:
+            if id in existing_ids:
+                send_status_update(f"Document {id} is already ingested.", update_status)
+                continue
+            remaining_ids.append(id)
+
+        if not remaining_ids:
+            return Result.ok([])
+
+        # Fetch metadata for remaining IDs
+        search = arxiv.Search(id_list=remaining_ids)
+        results: List[DocumentMetadata] = []
+        for result in search.results():
+            doc_id = result.entry_id.split("/")[-1]
+            if doc_id in existing_ids:
+                continue
+            metadata = DocumentMetadata(
+                doc_id=doc_id,
+                title=result.title,
+                authors=[a.name for a in result.authors],
+                published=result.published,
+                pdf_url=result.pdf_url or ("https://arxiv.org/pdf/" + doc_id),
+            )
+            results.append(metadata)
+
+        return Result.ok(results)
+    except Exception as e:
+        return Result.fail(ErrorType.ARXIV_ERROR, str(e))
+
+
+def send_status_update(message: str, update_status: Callable[[str], None] | None = None):
+    if update_status:
+        update_status(message)

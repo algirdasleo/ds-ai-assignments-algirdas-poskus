@@ -2,8 +2,13 @@ from typing import Callable, Dict, List
 
 from pydantic import BaseModel
 from smart_research_assistant.constants.prompt_templates import generate_answer_prompt
-from smart_research_assistant.helpers.research_paper_helper import gather_documents
+from smart_research_assistant.helpers.research_paper_helper import (
+    gather_documents_by_arxiv_ids,
+    gather_documents_by_query,
+    send_status_update,
+)
 from smart_research_assistant.helpers.text_processing_helper import (
+    extract_arxiv_id,
     extract_text_from_pdf,
     form_context,
     write_references,
@@ -13,7 +18,7 @@ from smart_research_assistant.models.llm_clients.openai_client import OpenAIChat
 from smart_research_assistant.services.chunking.base import ChunkingStrategy
 from smart_research_assistant.services.metadata_stores.base import MetadataStore
 from smart_research_assistant.services.vector_stores.base import VectorStore
-from smart_research_assistant.types.metadata import ChunkMetadata, Metadata
+from smart_research_assistant.types.metadata import ChunkMetadata, DocumentMetadata, Metadata
 from smart_research_assistant.types.rag_answer import AnswerModel
 from smart_research_assistant.types.result.result import ErrorType, Result
 from smart_research_assistant.ui.chat_box import ChatStreamParams
@@ -42,7 +47,7 @@ class RagPipeline:
         if not vector_load_result.is_success():
             raise ValueError(f"Failed to load vector store: {vector_load_result.error_message}")
 
-    def train(
+    def ingest_documents(
         self,
         import_query: str | None,
         n_import_documents: int | None = 10,
@@ -51,12 +56,40 @@ class RagPipeline:
         if not import_query or not n_import_documents:
             return Result.ok(None)
 
-        search_result = gather_documents(self.metadata_store, import_query, n_import_documents)
+        search_result = gather_documents_by_query(self.metadata_store, import_query, n_import_documents)
         if search_result.is_success():
             new_docs_metadata = search_result.data or []
         else:
             new_docs_metadata = []
 
+        return self._ingest_documents_from_metadata(new_docs_metadata, update_status)
+
+    def ingest_documents_from_links(
+        self, links: List[str], update_status: Callable[[str], None] | None
+    ) -> Result[None]:
+        if not links:
+            return Result.ok(None)
+
+        arxiv_ids = []
+        for link in links:
+            arxiv_id = extract_arxiv_id(link)
+            if arxiv_id:
+                arxiv_ids.append(arxiv_id)
+
+        if not arxiv_ids:
+            return Result.ok(None)
+
+        search_result = gather_documents_by_arxiv_ids(self.metadata_store, arxiv_ids, update_status)
+        if search_result.is_success():
+            new_docs_metadata = search_result.data or []
+        else:
+            new_docs_metadata = []
+
+        return self._ingest_documents_from_metadata(new_docs_metadata, update_status)
+
+    def _ingest_documents_from_metadata(
+        self, new_docs_metadata: List[DocumentMetadata], update_status: Callable[[str], None] | None
+    ) -> Result[None]:
         try:
             for doc_metadata in new_docs_metadata:
                 try:
@@ -114,30 +147,30 @@ class RagPipeline:
         stream_box: DeltaGenerator | None = None,
         update_status: Callable[[str], None] | None = None,
     ) -> Result[List[Metadata]]:
-        send_status_update("Embedding user prompt...", update_status)
         # 1. Embed user prompt
+        send_status_update("Embedding user prompt...", update_status)
         embedding_result = self.embedding_model.embed_batch([query])
         if not embedding_result.is_success() or not embedding_result.data:
             return Result.fail(ErrorType.RAG_PIPELINE_ERROR, embedding_result.error_message)
 
         query_embedding = embedding_result.data[0]
 
-        send_status_update("Performing similarity search...", update_status)
         # 2. Perform similarity search in vector store to find K top embeddings
+        send_status_update("Performing similarity search...", update_status)
         vector_result = self.vector_store.search(query_embedding, top_k=k_embeddings)
 
         if not vector_result.is_success() or not vector_result.data:
             return Result.fail(ErrorType.RAG_PIPELINE_ERROR, vector_result.error_message or "No similar vectors found.")
 
-        send_status_update("Filtering relevant documents...", update_status)
         # 3. Filter most relevant documents
+        send_status_update("Filtering relevant documents...", update_status)
         relevant_docs = [doc for doc in vector_result.data if doc.similarity_score > 0.5]
         if not relevant_docs:
             await self.inform_user_of_no_results(stream_box)
             return Result.fail(ErrorType.RAG_PIPELINE_ERROR, "No relevant documents found")
 
-        send_status_update("Retrieving documents metadatas...", update_status)
         # 4. For each relevant document, retrieve its metadata
+        send_status_update("Retrieving documents metadatas...", update_status)
         metadata: List[Metadata] = []
         for doc in relevant_docs:
             metadata_result = self.metadata_store.get(doc.doc_id)
@@ -171,14 +204,14 @@ class RagPipeline:
         update_status: Callable[[str], None] | None = None,
     ) -> Result[str]:
         try:
-            send_status_update("Creating LLM prompt with context...", update_status)
             # 1. Create context
+            send_status_update("Creating LLM prompt with context...", update_status)
             context = form_context(metadata, web_search_data)
             if context_box:
                 context_box.write(context)
 
-            send_status_update("Generating answer...", update_status)
             # 2. Generate answer
+            send_status_update("Generating answer...", update_status)
             answer = await OpenAIChatClient().chat_stream(
                 ChatStreamParams(
                     model_name=self.openai_chat_model,
@@ -217,8 +250,3 @@ class RagPipeline:
                 messages=[],
             )
         )
-
-
-def send_status_update(message: str, update_status: Callable[[str], None] | None = None):
-    if update_status:
-        update_status(message)

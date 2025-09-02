@@ -138,3 +138,7 @@ def count_tokens(text: str, model_name: str) -> int:
     except Exception as _:
         # If even GPT-2 tokenizer fails, then fallback to word count
         return len(text.split()) * 2
+
+
+def extract_arxiv_id(link: str) -> str | None:
+    return link.split("/")[-1].split("v")[0].split(".pdf")[0]

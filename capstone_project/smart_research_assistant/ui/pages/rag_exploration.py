@@ -35,9 +35,9 @@ with st.container(border=True):
 
         st.markdown(f"- Chunking strategy: {SemanticChunking.__name__}")
         with st.expander("Settings"):
-            similarity_threshold = st.slider("Sentence Similarity Threshold for Breakpoint creation", 0.0, 1.0, 0.70)
-            min_chunk_sentences = st.number_input("Minimum Chunk Size in Sentences", 1, 15, 5)
-            overlap_sentences = st.number_input("Overlap Size in Sentences", 0, 10, 3)
+            similarity_threshold = st.slider("Sentence Similarity Threshold for Breakpoint creation", 0.0, 1.0, 0.60)
+            min_chunk_sentences = st.number_input("Minimum Chunk Size in Sentences", 1, 10, 3)
+            overlap_sentences = st.number_input("Overlap Size in Sentences", 0, 10, 2)
 
         chunking_strategy = SemanticChunking(
             embed_model=embedding_model,
@@ -72,11 +72,11 @@ with st.container(border=True):
             with st.status("Importing Research Papers...", state="running", expanded=True) as status:
                 st.write(f'Searching Arxiv for documents with the query: "{arxiv_query}"...')
 
-                def update_status(message: str):
+                def update_import_status(message: str):
                     st.write(message)
 
-                process_result = pipeline.train(
-                    import_query=arxiv_query, n_import_documents=n_documents, update_status=update_status
+                process_result = pipeline.ingest_documents(
+                    import_query=arxiv_query, n_import_documents=n_documents, update_status=update_import_status
                 )
                 if not process_result.is_success():
                     status.update(label="Error during PDF processing.", state="error")
@@ -84,6 +84,32 @@ with st.container(border=True):
                     st.stop()
 
                 status.update(label="PDFs processing finished.", state="complete", expanded=False)
+
+        with st.expander("Import Specific Arxiv Papers by URL", expanded=False):
+            st.markdown("**You can import specific Arxiv papers by providing their URLs.**")
+
+            arxiv_urls = st.text_area(
+                "Enter Arxiv paper URLs (seperated by new lines)",
+                placeholder="https://arxiv.org/pdf/2501.00089\nhttps://arxiv.org/pdf/2501.12345",
+                height=140,
+            )
+
+            if st.button("Import Papers by URL"):
+                urls = [line.strip() for line in arxiv_urls.splitlines() if line.strip()]
+                if not urls:
+                    st.warning("Provide at least one URL.")
+                else:
+                    with st.status("Importing Arxiv papers by URL...", state="running", expanded=True) as status:
+
+                        def update_link_import_status(msg: str):
+                            st.write(msg)
+
+                        result = pipeline.ingest_documents_from_links(urls, update_status=update_link_import_status)
+                        if not result.is_success():
+                            status.update(label="Error during URL import.", state="error")
+                            st.error(result.error_message)
+                        else:
+                            status.update(label="URL import finished.", state="complete", expanded=False)
 
     with st.expander("Reset RAG Knowledge Base", expanded=False):
         if st.button("Reset RAG knowledge Base", type="primary"):
