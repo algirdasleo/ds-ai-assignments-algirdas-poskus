@@ -11,8 +11,8 @@ def launch_app() -> None:
             st.Page("ui/pages/model_comparison.py", title="Comparison"),
             st.Page("ui/pages/model_selection.py", title="Auto/Manual Selection"),
         ],
-        "RAG": [
-            st.Page("ui/pages/rag_exploration.py", title="RAG Exploration"),
+        "RESEARCH ASSISTANCE": [
+            st.Page("ui/pages/rag_exploration.py", title="RAG & AI Agent Workflow"),
         ],
         "OTHER": [
             st.Page("ui/pages/settings.py", title="Settings"),

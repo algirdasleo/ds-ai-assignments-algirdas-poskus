@@ -11,8 +11,8 @@ from smart_research_assistant.services.vector_stores.faiss_vector_store import F
 
 with st.container(border=True):
     with st.container(border=True):
-        st.markdown("## RAG Exploration")
-        st.markdown("**This page allows you to customize and execute a RAG pipeline.**")
+        st.markdown("## RAG & AI Agent Workflow")
+        st.markdown("This page allows you to customize and execute a RAG pipeline or agent workflow.")
 
     with st.container(border=True):
         st.markdown("### 1. Pipeline specifications")
@@ -22,10 +22,10 @@ with st.container(border=True):
         metadata_store = SQLMetadataStore()
 
         st.markdown(
-            f"- OpenAI Embedding Model: {OPENAI_EMBEDDING_MODELS.TEXT_EMBEDDING_3_SMALL.name} (Dim: {OPENAI_EMBEDDING_MODELS.TEXT_EMBEDDING_3_SMALL.value})"
+            f"- **OpenAI Embedding Model:** :green-badge[{OPENAI_EMBEDDING_MODELS.TEXT_EMBEDDING_3_SMALL.name} (Dim: {OPENAI_EMBEDDING_MODELS.TEXT_EMBEDDING_3_SMALL.value})]"
         )
-        st.markdown(f"- Vector Store: {vector_store.__class__.__name__}")
-        st.markdown(f"- Metadata Store: {metadata_store.__class__.__name__}")
+        st.markdown(f"- **Vector Store:** :green-badge[{vector_store.__class__.__name__}]")
+        st.markdown(f"- **Metadata Store:** :green-badge[{metadata_store.__class__.__name__}]")
 
         openai_model = st.selectbox("Select OpenAI Chat Model", options=list(OPENAI_MODELS.keys()))
 
@@ -33,7 +33,7 @@ with st.container(border=True):
         st.markdown("### 2. Build RAG knowledge base")
         st.markdown("**This section allows you to import scientific papers from Arxiv.**")
 
-        st.markdown(f"- Chunking strategy: {SemanticChunking.__name__}")
+        st.markdown(f"- **Chunking strategy:** :blue-badge[{SemanticChunking.__name__}]")
         with st.expander("Settings"):
             similarity_threshold = st.slider("Sentence Similarity Threshold for Breakpoint creation", 0.0, 1.0, 0.60)
             min_chunk_sentences = st.number_input("Minimum Chunk Size in Sentences", 1, 10, 3)
@@ -132,7 +132,7 @@ with st.container(border=True):
         with st.expander("Context"):
             context_box = st.empty()
 
-        with st.container(border=True):
+        with st.expander("Output", expanded=True):
             result_box = st.caption("Results...")
 
         with st.expander("Used References"):

@@ -65,7 +65,7 @@ class RagPipeline:
         return self._ingest_documents_from_metadata(new_docs_metadata, update_status)
 
     def ingest_documents_from_links(
-        self, links: List[str], update_status: Callable[[str], None] | None
+        self, links: List[str], update_status: Callable[[str], None] | None = None
     ) -> Result[None]:
         if not links:
             return Result.ok(None)

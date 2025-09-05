@@ -1,0 +1,52 @@
+[
+  {
+    "input": "What is the main innovation of the Transformer model?",
+    "expected_output": "The Transformer model introduced the self-attention mechanism, allowing parallelization and improved long-range dependency modeling.",
+    "arxiv_ids": ["1706.03762"]
+  },
+  {
+    "input": "What training objectives does BERT use?",
+    "expected_output": "BERT is trained using Masked Language Modeling (MLM) and Next Sentence Prediction (NSP).",
+    "arxiv_ids": ["1810.04805"]
+  },
+  {
+    "input": "How does the GPT model differ from BERT in architecture?",
+    "expected_output": "GPT uses a unidirectional (left-to-right) decoder architecture, while BERT uses a bidirectional encoder.",
+    "arxiv_ids": ["2005.14165", "1810.04805"]
+  },
+  {
+    "input": "What is the Adam optimizer and how does it work?",
+    "expected_output": "Adam is an optimizer that uses adaptive learning rates and momentum by maintaining running averages of gradients and squared gradients.",
+    "arxiv_ids": ["1412.6980"]
+  },
+  {
+    "input": "What is attention in the context of deep learning?",
+    "expected_output": "Attention is a mechanism that allows models to focus on relevant parts of the input when generating output, especially useful in sequence-to-sequence tasks.",
+    "arxiv_ids": ["1706.03762"]
+  },
+  {
+    "input": "How does AlphaFold predict protein structures?",
+    "expected_output": "AlphaFold predicts protein 3D structures using deep learning models trained on evolutionary, physical, and geometric constraints.",
+    "arxiv_ids": ["2107.01446"]
+  },
+  {
+    "input": "What are diffusion models used for in AI?",
+    "expected_output": "Diffusion models generate data by reversing a gradual noising process and have shown success in image and text generation tasks.",
+    "arxiv_ids": ["2006.11239"]
+  },
+  {
+    "input": "How do Vision Transformers (ViTs) work?",
+    "expected_output": "Vision Transformers apply the Transformer architecture directly to image patches, using self-attention instead of convolutions.",
+    "arxiv_ids": ["2010.11929"]
+  },
+  {
+    "input": "What is reinforcement learning from human feedback (RLHF)?",
+    "expected_output": "RLHF is a training method where human preferences are used to guide the reward model in reinforcement learning.",
+    "arxiv_ids": ["2009.01325"]
+  },
+  {
+    "input": "What is contrastive learning in self-supervised learning?",
+    "expected_output": "Contrastive learning trains models to distinguish between similar and dissimilar data points, often using positive and negative pairs.",
+    "arxiv_ids": ["2002.05709"]
+  }
+]

@@ -106,8 +106,8 @@ class OpenAIChatClient(ChatModel):
     ) -> AsyncResponseStreamManager[BaseModel] | AsyncResponseStreamManager[NotGiven]:
         @retry(
             retry=retry_if_exception_type((RateLimitError, APIConnectionError)),
-            wait=wait_exponential(multiplier=1, min=4, max=10),
-            stop=stop_after_attempt(3),
+            wait=wait_exponential(multiplier=2, min=10, max=60),
+            stop=stop_after_attempt(5),
         )
         async def _chat_stream_with_retry(
             params: ChatStreamParams,
