@@ -41,7 +41,7 @@ async def render_chatbox(
         result = await model.chat_stream(params)
 
         if result.data is None or not result.is_success():
-            st.error(f"Error occurred while fetching chat response. Reason: {result.error}")
+            st.error(f"Error occurred while fetching chat response. Reason: {result.error_message}")
             return
 
         st.session_state[chatbot_id]["local_messages"] = result.data.updated_messages

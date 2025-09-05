@@ -173,7 +173,9 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Others
+# Specific folder
 **/.venv/
 **/.idea/
 **/ollama/ollama
+**/rag_files/
+**/.deepeval/

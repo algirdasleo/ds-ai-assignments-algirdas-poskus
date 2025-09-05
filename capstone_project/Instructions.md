@@ -40,3 +40,13 @@ poetry run python init_db.py
 ``` bash
 poetry run python run.py
 ```
+
+### 5. Evaluate RAG and Generation performance using DeepEval
+
+``` bash
+poetry run python evaluate_rag.py
+```
+
+This will run the following tests:
+- RAG: PrecisionAtK, ContextualPrecisionMetric, ContextualRelevancyMetric
+- Generation: FaithfulnessMetric, AnswerRelevancyMetric

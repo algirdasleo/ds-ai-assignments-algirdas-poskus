@@ -11,8 +11,8 @@ from smart_research_assistant.services.vector_stores.faiss_vector_store import F
 
 with st.container(border=True):
     with st.container(border=True):
-        st.markdown("## RAG Exploration")
-        st.markdown("**This page allows you to customize and execute a RAG pipeline.**")
+        st.markdown("## RAG & AI Agent Workflow")
+        st.markdown("This page allows you to customize and execute a RAG pipeline or agent workflow.")
 
     with st.container(border=True):
         st.markdown("### 1. Pipeline specifications")
@@ -22,10 +22,10 @@ with st.container(border=True):
         metadata_store = SQLMetadataStore()
 
         st.markdown(
-            f"- OpenAI Embedding Model: {OPENAI_EMBEDDING_MODELS.TEXT_EMBEDDING_3_SMALL.name} (Dim: {OPENAI_EMBEDDING_MODELS.TEXT_EMBEDDING_3_SMALL.value})"
+            f"- **OpenAI Embedding Model:** :green-badge[{OPENAI_EMBEDDING_MODELS.TEXT_EMBEDDING_3_SMALL.name} (Dim: {OPENAI_EMBEDDING_MODELS.TEXT_EMBEDDING_3_SMALL.value})]"
         )
-        st.markdown(f"- Vector Store: {vector_store.__class__.__name__}")
-        st.markdown(f"- Metadata Store: {metadata_store.__class__.__name__}")
+        st.markdown(f"- **Vector Store:** :green-badge[{vector_store.__class__.__name__}]")
+        st.markdown(f"- **Metadata Store:** :green-badge[{metadata_store.__class__.__name__}]")
 
         openai_model = st.selectbox("Select OpenAI Chat Model", options=list(OPENAI_MODELS.keys()))
 
@@ -33,11 +33,11 @@ with st.container(border=True):
         st.markdown("### 2. Build RAG knowledge base")
         st.markdown("**This section allows you to import scientific papers from Arxiv.**")
 
-        st.markdown(f"- Chunking strategy: {SemanticChunking.__name__}")
+        st.markdown(f"- **Chunking strategy:** :blue-badge[{SemanticChunking.__name__}]")
         with st.expander("Settings"):
-            similarity_threshold = st.slider("Sentence Similarity Threshold for Breakpoint creation", 0.0, 1.0, 0.70)
-            min_chunk_sentences = st.number_input("Minimum Chunk Size in Sentences", 1, 15, 5)
-            overlap_sentences = st.number_input("Overlap Size in Sentences", 0, 10, 3)
+            similarity_threshold = st.slider("Sentence Similarity Threshold for Breakpoint creation", 0.0, 1.0, 0.60)
+            min_chunk_sentences = st.number_input("Minimum Chunk Size in Sentences", 1, 10, 3)
+            overlap_sentences = st.number_input("Overlap Size in Sentences", 0, 10, 2)
 
         chunking_strategy = SemanticChunking(
             embed_model=embedding_model,
@@ -72,11 +72,11 @@ with st.container(border=True):
             with st.status("Importing Research Papers...", state="running", expanded=True) as status:
                 st.write(f'Searching Arxiv for documents with the query: "{arxiv_query}"...')
 
-                def update_status(message: str):
+                def update_import_status(message: str):
                     st.write(message)
 
-                process_result = pipeline.train(
-                    import_query=arxiv_query, n_import_documents=n_documents, update_status=update_status
+                process_result = pipeline.ingest_documents(
+                    import_query=arxiv_query, n_import_documents=n_documents, update_status=update_import_status
                 )
                 if not process_result.is_success():
                     status.update(label="Error during PDF processing.", state="error")
@@ -84,6 +84,32 @@ with st.container(border=True):
                     st.stop()
 
                 status.update(label="PDFs processing finished.", state="complete", expanded=False)
+
+        with st.expander("Import Specific Arxiv Papers by URL", expanded=False):
+            st.markdown("**You can import specific Arxiv papers by providing their URLs.**")
+
+            arxiv_urls = st.text_area(
+                "Enter Arxiv paper URLs (seperated by new lines)",
+                placeholder="https://arxiv.org/pdf/2501.00089\nhttps://arxiv.org/pdf/2501.12345",
+                height=140,
+            )
+
+            if st.button("Import Papers by URL"):
+                urls = [line.strip() for line in arxiv_urls.splitlines() if line.strip()]
+                if not urls:
+                    st.warning("Provide at least one URL.")
+                else:
+                    with st.status("Importing Arxiv papers by URL...", state="running", expanded=True) as status:
+
+                        def update_link_import_status(msg: str):
+                            st.write(msg)
+
+                        result = pipeline.ingest_documents_from_links(urls, update_status=update_link_import_status)
+                        if not result.is_success():
+                            status.update(label="Error during URL import.", state="error")
+                            st.error(result.error_message)
+                        else:
+                            status.update(label="URL import finished.", state="complete", expanded=False)
 
     with st.expander("Reset RAG Knowledge Base", expanded=False):
         if st.button("Reset RAG knowledge Base", type="primary"):
@@ -106,7 +132,7 @@ with st.container(border=True):
         with st.expander("Context"):
             context_box = st.empty()
 
-        with st.container(border=True):
+        with st.expander("Output", expanded=True):
             result_box = st.caption("Results...")
 
         with st.expander("Used References"):
