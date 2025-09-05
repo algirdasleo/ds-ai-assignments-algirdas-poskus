@@ -1,14 +1,24 @@
-# Model comparison tool - Smart Research Assistant
-
-A stream-lit based app to compare different AI models responses side by side using multiple prompting strategies.
+# Smart Research Assistant Tool
 
 ## Features
 
-- Compare two AI models (e.g. OpenAI's GPT-3.5 Turbo and GPT-4) side by side.
-- Use different prompting strategies: Zero-shot, Few-shot, Chain of Thought and more.
-- Real-time streaming of model responses.
-- Cost, usage and time metrics for each model.
-- '.env' API key management through the Streamlit interface.
+### Model Comparisons:
+- Multiple Local/Cloud models
+- Multiple prompting strategies
+- Real-time asynchronous answer streaming side-by-side
+- 4 key statistics displayed (cost, tokens used, time taken, time to 1st token)
+
+### Local Models:
+- Run local models with **Ollama**
+- Pick models automatically by using “intelligent” routing according to the keywords and complexity of the prompt.
+- Chat using local models with tracking of history.
+
+### RAG & AI Agent Workflow:
+- RAG knowledge base - import Arxiv research papers by URL or Query.
+- Multiple OpenAI selectable generation models
+- Enter a query and execute:
+  - **RAG Pipeline** – Searches the downloaded papers for top embeddings similar to prompt
+  - **RAG Agent Workflow** – Uses RAG + Web Search for AI/ML related topics and only Web Search for other topics.
 
 ## Installation
 
